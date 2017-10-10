@@ -73,8 +73,8 @@ def parseXyz(fname,out_dir,cores):
   out_object.close()
   os.system('qsub '+input_pbs)
 
-def genInput(dirs,files,cores):
+def genInput(states,files,cores):
   import os
-  out_dir = dirs + '/' + 's0'
-  os.chdir(dirs)
+  out_dir = os.path.abspath(states)
+  os.chdir(out_dir)
   parseXyz(files,out_dir,cores)

@@ -1,0 +1,104 @@
+##########################################################################
+#
+# Script for submitting parallel Gaussian 09 jobs to the cluster. 
+#
+###########################################################################
+#
+#  Submit the script using "qsub <pbs_file>".
+#
+###########################################################################
+# Lines that begin with #PBS are PBS directives (not comments).
+# True comments begin with "# " (i,e., # followed by a space).
+###########################################################################
+
+#PBS -S /bin/bash
+#PBS -N example_prefix
+#PBS -o ${PBS_JOBNAME}.out
+#PBS -j oe
+#PBS -q batch
+#PBS -l nodes=1:ppn=4
+#PBS -l walltime=1000:00:00
+#PBS -V
+
+#############################################################################
+#  -S: shell the job will run under
+#  -o: name of the queue error filename
+#  -j: merges stdout and stderr to the same file
+#  -l: resources required by the job: number of nodes and processors per node
+#  -l: resources required by the job: maximun job time length
+#############################################################################
+
+# Define variable "jobname".
+
+jobname=${PBS_JOBNAME}
+username=`whoami`
+
+ulimit -s unlimited
+
+# Define the location where Gaussian was installed and run
+# a setup script, g09.profile.
+
+g09root=/opt
+source $g09root/g09/bsd/g09.profile
+
+# Define PATH to include location of LINDA
+# PATH=$PATH:/export/home/gaussian/g09/linda8.2/opteron-linux/bin
+
+# Make a directory in scr and copy .com and .g09 file to there.
+
+GAUSS_RUNDIR=/scratch/${username}.$PBS_JOBID
+if [ ! -a $GAUSS_RUNDIR ]; then
+   echo "Scratch directory $GAUSS_RUNDIR created."
+   mkdir -p $GAUSS_RUNDIR
+fi
+
+cp $PBS_O_WORKDIR/${jobname}.* $GAUSS_RUNDIR
+
+ORIG_PBS_O_WORKDIR=${PBS_O_WORKDIR}
+PBS_O_WORKDIR=${GAUSS_RUNDIR}
+cd $PBS_O_WORKDIR
+
+# Setup for Gaussian 09:
+# =======================
+# Make a scratch directory if it doesn't already exist.
+
+GAUSS_SCRDIR=$GAUSS_RUNDIR/${jobname}
+if [ ! -a $GAUSS_SCRDIR ]; then
+   echo "Scratch directory $GAUSS_SCRDIR created."
+   mkdir -p $GAUSS_SCRDIR
+fi
+export GAUSS_SCRDIR
+echo "Using $GAUSS_SCRDIR for temporary Gaussian 09 files."
+
+
+G03_NODEFILE=${PBS_NODEFILE}
+
+GAUSS_LFLAGS="-mp 4 -nodefile $PBS_NODEFILE"
+
+# Export variable list
+
+export PATH g09root GAUSS_LFLAGS
+
+echo pbs nodefile:
+
+cat $PBS_NODEFILE
+
+#Run a Gaussian command file, water09.com, redirecting output
+#to a file, water09.log
+
+echo "Starting Gaussian run at" `date`
+
+time g09 < $GAUSS_RUNDIR/${jobname}.com >$GAUSS_RUNDIR/${jobname}.log
+
+echo "Finished Gaussian run at" `date`
+
+PBS_O_WORKDIR=${ORIG_PBS_O_WORKDIR}
+
+echo $PBS_O_WORKDIR
+
+mv $GAUSS_RUNDIR/*.chk $PBS_O_WORKDIR
+mv $GAUSS_RUNDIR/${jobname}.* $PBS_O_WORKDIR
+echo "$GAUSS_SCRDIR"
+
+rm -Rf $GAUSS_RUNDIR
+

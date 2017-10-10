@@ -72,8 +72,13 @@ def writeMols(molecular,charge,number,res_list,atom_num,atom_pos,atom_syb,mullik
       for j in i:
         out_object.write(' ')
         for k in j:
-          out_object.write('%.6f' % float(k))
-          out_object.write('  ')
+          if float(k)<0:
+            out_object.write('%.6f' % float(k))
+            out_object.write('  ')
+          else:
+            out_object.write(' ')
+            out_object.write('%.6f' % float(k))
+            out_object.write('  ')
         out_object.write('\n')
 
           

@@ -1,99 +1,7 @@
 #/usr/bin/python
 import re
 import os
-import sys
-def writeMolsS0(molecular,charge,number,res_list,atom_num,atom_pos,atom_syb,mulliken,atom_mass,frequencies,vibration):
-  with open(out_file,'w') as out_object:
-    out_object.write('------------------------------Chemical Formula and Charge---------------------------------------------------------------\n')
-    out_object.write(' ')
-    out_object.write(molecular+"  "+charge+"\n")
-    out_object.write('------------------------------SMILES------------------------------------------------------------------------------------\n')
-    out_object.write(' '+smiles+'\n')
-    out_object.write('------------------------------Basic properties--------------------------------------------------------------------------\n')
-    out_object.write('--tag--index---A---B---C----dipole--isotropic--homo--lumo--gap--r2------zpve--U0--U--H--G--Cv---------------------------\n')
-    out_object.write('--xxx--XXXXXX--GHz-GHz-Ghz--Debye---Bohr^3-----Ha----Ha----Ha---Bohr^2--Ha----Ha--Ha-Ha-Ha-cal/(mol K)------------------\n')
-    out_object.write(' gdb  '+number+'  ')
-    for i in res_list:
-      out_object.write('%.6f' % float(i))
-      out_object.write('  ')
-    out_object.write('\n')
-    out_object.write('------------------------------Element,XYZ (Angstrom)--------------------------------------------------------------------\n')
-    temp = str(atom_num)
-    out_object.write(' '+temp+'\n')
-    str1 = re.compile(r'-*\d+\.*\d*')
-    for i in range(atom_num):
-      temp = str1.findall(atom_pos[-1-i])
-      #print temp
-      out_object.write(' '+atom_syb[i+1]+'  ')
-      if float(temp[3])<0:
-        out_object.write('%.6f' % float(temp[3]))
-        out_object.write('  ')
-      else:
-        out_object.write(' ')
-        out_object.write('%.6f' % float(temp[3]))
-        out_object.write('  ')
-      if float(temp[4])<0:
-        out_object.write('%.6f' % float(temp[4]))
-        out_object.write('  ')
-      else:
-        out_object.write(' ')
-        out_object.write('%.6f' % float(temp[4]))
-        out_object.write('  ')
-      if float(temp[5])<0:
-        out_object.write('%.6f' % float(temp[5]))
-        out_object.write('  ')
-      else:
-        out_object.write(' ')
-        out_object.write('%.6f' % float(temp[5]))
-        out_object.write('  ')
-      out_object.write('\n')
-    out_object.write('------------------------------Mulliken Partial Charge (|e|)-------------------------------------------------------------\n')
-    for i in mulliken:
-      out_object.write(' ')
-      out_object.write('%.6f' % float(i))
-      out_object.write('  ')
-    out_object.write('\n')
-    out_object.write('------------------------------Atom Mass (Relative atomic mass)----------------------------------------------------------\n')
-    for i in atom_mass:
-      out_object.write(' ')
-      out_object.write('%.6f' % float(i))
-      out_object.write('  ')
-    out_object.write('\n')
-    out_object.write('------------------------------Vibration Frequency (cm-1)----------------------------------------------------------------\n')
-    for i in frequencies:
-      i=i.rstrip()
-      temp = i.split(' ')
-      for j in temp:
-        out_object.write(' ')
-        out_object.write('%.6f' % float(j))
-        out_object.write('  ')
-      out_object.write('\n')
-    out_object.write('------------------------------Vibration Modes---------------------------------------------------------------------------\n')
-    for i in vibration:
-      for j in i:
-        #out_object.write(' ')
-        for k in j:
-          if float(k)<0:
-            out_object.write('%.6f' % float(k))
-            out_object.write('  ')
-          else:
-            out_object.write(' ')
-            out_object.write('%.6f' % float(k))
-            out_object.write('  ')
-        out_object.write('\n')   
-    #out_object.write('------------------------------Excited State T1: energy(Ha),lifetime(au),structure(Angstrom)-----------------------------\n')
-
-    #out_object.write('------------------------------Emitting Efficiency-----------------------------------------------------------------------\n')
-
-#    out_object.write('------------------------------Emitting Spectrum (cm-1,au)---------------------------------------------------------------\n')
-
- #   out_object.write('------------------------------Absorption Spectrum (cm-1,au)-------------------------------------------------------------\n')
-
-#    out_object.write('------------------------------End---------------------------------------------------------------------------------------\n')
-
-          
-
-
+import sys     
 def parseCom(fname):
   #fname = os.path.basename(fname)
   atom_syb = []
@@ -132,6 +40,7 @@ def parseLogS0(fname):
   frequencies = []
   vibration = []
   res_list = []
+  # m
   res_list1 = []
   res_list2 = []
   res_list3 = []
@@ -296,7 +205,92 @@ def parseLogS0(fname):
   for i in res_list14:
     temp = i.split(' ')
     atom_mass.append(temp[-1])
-  writeMolsS0(molecular,charge,number,res_list,atom_num,atom_pos,atom_syb,mulliken,atom_mass,frequencies,vibration)
+  with open(out_file,'w') as out_object:
+    out_object.write('------------------------------Chemical Formula and Charge---------------------------------------------------------------\n')
+    out_object.write(' ')
+    out_object.write(molecular+"  "+charge+"\n")
+    out_object.write('------------------------------SMILES------------------------------------------------------------------------------------\n')
+    out_object.write(' '+smiles+'\n')
+    out_object.write('------------------------------Basic properties--------------------------------------------------------------------------\n')
+    out_object.write('--tag--index---A---B---C----dipole--isotropic--homo--lumo--gap--r2------zpve--U0--U--H--G--Cv---------------------------\n')
+    out_object.write('--xxx--XXXXXX--GHz-GHz-Ghz--Debye---Bohr^3-----Ha----Ha----Ha---Bohr^2--Ha----Ha--Ha-Ha-Ha-cal/(mol K)------------------\n')
+    out_object.write(' gdb  '+number+'  ')
+    for i in res_list:
+      out_object.write('%.6f' % float(i))
+      out_object.write('  ')
+    out_object.write('\n')
+    out_object.write('------------------------------Element,XYZ (Angstrom)--------------------------------------------------------------------\n')
+    temp = str(atom_num)
+    out_object.write(' '+temp+'\n')
+    str1 = re.compile(r'-*\d+\.*\d*')
+    for i in range(atom_num):
+      temp = str1.findall(atom_pos[-1-i])
+      #print temp
+      out_object.write(' '+atom_syb[i+1]+'  ')
+      if float(temp[3])<0:
+        out_object.write('%.6f' % float(temp[3]))
+        out_object.write('  ')
+      else:
+        out_object.write(' ')
+        out_object.write('%.6f' % float(temp[3]))
+        out_object.write('  ')
+      if float(temp[4])<0:
+        out_object.write('%.6f' % float(temp[4]))
+        out_object.write('  ')
+      else:
+        out_object.write(' ')
+        out_object.write('%.6f' % float(temp[4]))
+        out_object.write('  ')
+      if float(temp[5])<0:
+        out_object.write('%.6f' % float(temp[5]))
+        out_object.write('  ')
+      else:
+        out_object.write(' ')
+        out_object.write('%.6f' % float(temp[5]))
+        out_object.write('  ')
+      out_object.write('\n')
+    out_object.write('------------------------------Mulliken Partial Charge (|e|)-------------------------------------------------------------\n')
+    for i in mulliken:
+      out_object.write(' ')
+      out_object.write('%.6f' % float(i))
+      out_object.write('  ')
+    out_object.write('\n')
+    out_object.write('------------------------------Atom Mass (Relative atomic mass)----------------------------------------------------------\n')
+    for i in atom_mass:
+      out_object.write(' ')
+      out_object.write('%.6f' % float(i))
+      out_object.write('  ')
+    out_object.write('\n')
+    out_object.write('------------------------------Vibration Frequency (cm-1)----------------------------------------------------------------\n')
+    for i in frequencies:
+      i=i.rstrip()
+      temp = i.split(' ')
+      for j in temp:
+        out_object.write(' ')
+        out_object.write('%.6f' % float(j))
+        out_object.write('  ')
+      out_object.write('\n')
+    out_object.write('------------------------------Vibration Modes---------------------------------------------------------------------------\n')
+    for i in vibration:
+      for j in i:
+        #out_object.write(' ')
+        for k in j:
+          if float(k)<0:
+            out_object.write('%.6f' % float(k))
+            out_object.write('  ')
+          else:
+            out_object.write(' ')
+            out_object.write('%.6f' % float(k))
+            out_object.write('  ')
+        out_object.write('\n')   
+    #out_object.write('------------------------------Excited State T1: energy(Ha),lifetime(au),structure(Angstrom)-----------------------------\n')
+  
+    #out_object.write('------------------------------Emitting Efficiency-----------------------------------------------------------------------\n')
+  #    out_object.write('------------------------------Emitting Spectrum (cm-1,au)---------------------------------------------------------------\n')
+  
+  #   out_object.write('------------------------------Absorption Spectrum (cm-1,au)-------------------------------------------------------------\n')
+  
+  #  out_object.write('------------------------------End---------------------------------------------------------------------------------------\n')
 
 def parseLogS1T1(fname):
   atom_syb = parseCom(fname)
@@ -331,10 +325,7 @@ def parseLogS1T1(fname):
   energy_s1 = temp[-1]
   for i in range(atom_num):
     atom_pos.append(res_list2[-1-i])
-  writeMolsS1T1(energy_s1,atom_pos,atom_syb)
 
-def writeMolsS1T1(energy_s1,atom_pos,atom_syb):
-  atom_num = len(atom_syb)-1
   with open(out_file,'a') as out_object:
     out_object.write(tokens)
     out_object.write(' '+energy_s1+note1+'\n')

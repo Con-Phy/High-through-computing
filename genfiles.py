@@ -9,3 +9,4 @@ def genFiles(molecular_dir):
   os.mkdir('t1')
   os.mkdir('nacme')
   os.mkdir('numfraq')
+  os.mkdir('optic')

@@ -1,13 +1,14 @@
 #/usr/bin/python
-def writeMols(molecular,charge,number,res_list,atom_num,atom_pos,atom_syb,mulliken,atom_mass,frequencies,vibration):
-  import re
-  out_file = number+'_'+molecular+'.mols'
+import re
+import os
+import sys
+def writeMolsS0(molecular,charge,number,res_list,atom_num,atom_pos,atom_syb,mulliken,atom_mass,frequencies,vibration):
   with open(out_file,'w') as out_object:
     out_object.write('------------------------------Chemical Formula and Charge---------------------------------------------------------------\n')
     out_object.write(' ')
-    out_object.write(molecular+'  '+charge+'\n')
+    out_object.write(molecular+"  "+charge+"\n")
     out_object.write('------------------------------SMILES------------------------------------------------------------------------------------\n')
-    out_object.write(' H2O\n')
+    out_object.write(' '+molecular+'\n')
     out_object.write('------------------------------Basic properties--------------------------------------------------------------------------\n')
     out_object.write('--tag--index---A---B---C----dipole--isotropic--homo--lumo--gap--r2------zpve--U0--U--H--G--Cv---------------------------\n')
     out_object.write('--xxx--XXXXXX--GHz-GHz-Ghz--Debye---Bohr^3-----Ha----Ha----Ha---Bohr^2--Ha----Ha--Ha-Ha-Ha-cal/(mol K)------------------\n')
@@ -70,7 +71,7 @@ def writeMols(molecular,charge,number,res_list,atom_num,atom_pos,atom_syb,mullik
     out_object.write('------------------------------Vibration Modes---------------------------------------------------------------------------\n')
     for i in vibration:
       for j in i:
-        out_object.write(' ')
+        #out_object.write(' ')
         for k in j:
           if float(k)<0:
             out_object.write('%.6f' % float(k))
@@ -79,13 +80,22 @@ def writeMols(molecular,charge,number,res_list,atom_num,atom_pos,atom_syb,mullik
             out_object.write(' ')
             out_object.write('%.6f' % float(k))
             out_object.write('  ')
-        out_object.write('\n')
+        out_object.write('\n')   
+    #out_object.write('------------------------------Excited State T1: energy(Ha),lifetime(au),structure(Angstrom)-----------------------------\n')
+
+    #out_object.write('------------------------------Emitting Efficiency-----------------------------------------------------------------------\n')
+
+#    out_object.write('------------------------------Emitting Spectrum (cm-1,au)---------------------------------------------------------------\n')
+
+ #   out_object.write('------------------------------Absorption Spectrum (cm-1,au)-------------------------------------------------------------\n')
+
+#    out_object.write('------------------------------End---------------------------------------------------------------------------------------\n')
 
           
 
 
 def parseCom(fname):
-  import re
+  #fname = os.path.basename(fname)
   atom_syb = []
   temp = fname.split('.')
   fname = temp[0]+'.com'
@@ -105,14 +115,15 @@ def parseCom(fname):
   in_object.close()
   return atom_syb
   
-def parseLog(fname):
+def parseLogS0(fname):
+  work_dir = root_dir+'s0/'
+  os.chdir(work_dir)
   atom_syb = parseCom(fname)
   charge = atom_syb[0]
   atom_num = len(atom_syb)-1
   temp = fname.split('_')
   molecular = temp[1]
   number = temp[0]
-  import re
   temp = []
   mulliken = []
   atom_pos = []
@@ -238,7 +249,7 @@ def parseLog(fname):
         vibration.append(temp_list1)
         vibration.append(temp_list2)
         vibration.append(temp_list3)
-        print vibration
+        #print vibration
         
       res = re.match(r'.*Temperature',line)
       if res:
@@ -285,7 +296,105 @@ def parseLog(fname):
   for i in res_list14:
     temp = i.split(' ')
     atom_mass.append(temp[-1])
-  
-  writeMols(molecular,charge,number,res_list,atom_num,atom_pos,atom_syb,mulliken,atom_mass,frequencies,vibration)
-fname = '000003_H2O_s0.log'
-parseLog(fname)
+  writeMolsS0(molecular,charge,number,res_list,atom_num,atom_pos,atom_syb,mulliken,atom_mass,frequencies,vibration)
+
+def parseLogS1T1(fname,tokens):
+  atom_syb = parseCom(fname)
+  atom_num = len(atom_syb)-1
+  #energy_s1  = []
+  atom_pos  = []
+  res_list1 = []
+  res_list2 = []
+  res_list3 = []
+  with open(fname,'r') as in_object:
+    while 1:
+      line = in_object.readline()
+      if not line:
+        break
+      res = re.match(r' SCF Done',line)
+      if res:
+        res_list1.append(line)
+      res = re.match(r'.*Standard orientation',line)
+      if res:
+        line = in_object.readline() 
+        line = in_object.readline() 
+        line = in_object.readline() 
+        line = in_object.readline() 
+        line = in_object.readline()
+        j = 0
+        while j < atom_num:
+          res_list2.append(line)
+          line = in_object.readline()
+          j+=1
+  str1 = re.compile(r'-*\d+\.\d+')
+  temp = str1.findall(res_list1[-1])
+  energy_s1 = temp[-1]
+  for i in range(atom_num):
+    atom_pos.append(res_list2[-1-i])
+  writeMolsS1T1(energy_s1,atom_pos,atom_syb,tokens)
+
+def writeMolsS1T1(energy_s1,atom_pos,atom_syb,tokens):
+  atom_num = len(atom_syb)-1
+  with open(out_file,'a') as out_object:
+    out_object.write(tokens)
+    out_object.write(' '+energy_s1+'\n')
+    out_object.write('\n')
+    str1 = re.compile(r'-*\d+\.*\d*')
+    for i in range(atom_num):
+      temp = str1.findall(atom_pos[-1-i])
+      #print temp
+      out_object.write(' '+atom_syb[i+1]+'  ')
+      if float(temp[3])<0:
+        out_object.write('%.6f' % float(temp[3]))
+        out_object.write('  ')
+      else:
+        out_object.write(' ')
+        out_object.write('%.6f' % float(temp[3]))
+        out_object.write('  ')
+      if float(temp[4])<0:
+        out_object.write('%.6f' % float(temp[4]))
+        out_object.write('  ')
+      else:
+        out_object.write(' ')
+        out_object.write('%.6f' % float(temp[4]))
+        out_object.write('  ')
+      if float(temp[5])<0:
+        out_object.write('%.6f' % float(temp[5]))
+        out_object.write('  ')
+      else:
+        out_object.write(' ')
+        out_object.write('%.6f' % float(temp[5]))
+        out_object.write('  ')
+      out_object.write('\n')
+
+
+root_dir = '/home/qhuang/HzwDb/gdb/000003_H2O/'
+os.system('cd '+root_dir)
+work_dir = root_dir+'s0/'
+os.system('cd '+work_dir)
+for files in os.listdir(work_dir):
+  if re.match(r'.*\.log',files):
+    fname = files
+    break
+temp = fname.split('_')
+out_file = root_dir+temp[0]+'_'+temp[1]+'.mols'
+parseLogS0(fname)
+
+tokens = '------------------------------Excited State S1: energy(Ha),lifetime(au),structure(Angstrom)-----------------------------\n'
+work_dir = root_dir+'/s1/'
+os.chdir(work_dir)
+for files in os.listdir(work_dir):
+  if re.match(r'.*\.log',files):
+    fname = files
+    break
+parseLogS1T1(fname,tokens)
+
+tokens = '------------------------------Excited State T1: energy(Ha),lifetime(au),structure(Angstrom)-----------------------------\n'
+work_dir = root_dir+'/t1/'
+os.chdir(work_dir)
+for files in os.listdir(work_dir):
+  if re.match(r'.*\.log',files):
+    fname = files
+    break
+parseLogS1T1(fname,tokens)
+

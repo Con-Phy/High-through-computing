@@ -8,7 +8,7 @@ def writeMolsS0(molecular,charge,number,res_list,atom_num,atom_pos,atom_syb,mull
     out_object.write(' ')
     out_object.write(molecular+"  "+charge+"\n")
     out_object.write('------------------------------SMILES------------------------------------------------------------------------------------\n')
-    out_object.write(' '+molecular+'\n')
+    out_object.write(' '+smiles+'\n')
     out_object.write('------------------------------Basic properties--------------------------------------------------------------------------\n')
     out_object.write('--tag--index---A---B---C----dipole--isotropic--homo--lumo--gap--r2------zpve--U0--U--H--G--Cv---------------------------\n')
     out_object.write('--xxx--XXXXXX--GHz-GHz-Ghz--Debye---Bohr^3-----Ha----Ha----Ha---Bohr^2--Ha----Ha--Ha-Ha-Ha-cal/(mol K)------------------\n')
@@ -298,7 +298,7 @@ def parseLogS0(fname):
     atom_mass.append(temp[-1])
   writeMolsS0(molecular,charge,number,res_list,atom_num,atom_pos,atom_syb,mulliken,atom_mass,frequencies,vibration)
 
-def parseLogS1T1(fname,tokens):
+def parseLogS1T1(fname):
   atom_syb = parseCom(fname)
   atom_num = len(atom_syb)-1
   #energy_s1  = []
@@ -331,14 +331,14 @@ def parseLogS1T1(fname,tokens):
   energy_s1 = temp[-1]
   for i in range(atom_num):
     atom_pos.append(res_list2[-1-i])
-  writeMolsS1T1(energy_s1,atom_pos,atom_syb,tokens)
+  writeMolsS1T1(energy_s1,atom_pos,atom_syb)
 
-def writeMolsS1T1(energy_s1,atom_pos,atom_syb,tokens):
+def writeMolsS1T1(energy_s1,atom_pos,atom_syb):
   atom_num = len(atom_syb)-1
   with open(out_file,'a') as out_object:
     out_object.write(tokens)
-    out_object.write(' '+energy_s1+'\n')
-    out_object.write('\n')
+    out_object.write(' '+energy_s1+note1+'\n')
+    out_object.write(note2+'\n')
     str1 = re.compile(r'-*\d+\.*\d*')
     for i in range(atom_num):
       temp = str1.findall(atom_pos[-1-i])
@@ -367,9 +367,17 @@ def writeMolsS1T1(energy_s1,atom_pos,atom_syb,tokens):
         out_object.write('  ')
       out_object.write('\n')
 
+def parseXyz(fname):
+  with open(fname,'r') as in_object:
+    lines = in_object.readlines()
+    temp = lines[-2]
+    temp.split(' ')
+    return temp[0]
 
 root_dir = '/home/qhuang/HzwDb/gdb/000003_H2O/'
 os.system('cd '+root_dir)
+smiles = parseXyz('000003_H2O.xyz')
+
 work_dir = root_dir+'s0/'
 os.system('cd '+work_dir)
 for files in os.listdir(work_dir):
@@ -381,20 +389,24 @@ out_file = root_dir+temp[0]+'_'+temp[1]+'.mols'
 parseLogS0(fname)
 
 tokens = '------------------------------Excited State S1: energy(Ha),lifetime(au),structure(Angstrom)-----------------------------\n'
+note1 = '  #S1'
+note2 = '               #S1 life'
 work_dir = root_dir+'/s1/'
 os.chdir(work_dir)
 for files in os.listdir(work_dir):
   if re.match(r'.*\.log',files):
     fname = files
     break
-parseLogS1T1(fname,tokens)
+parseLogS1T1(fname)
 
 tokens = '------------------------------Excited State T1: energy(Ha),lifetime(au),structure(Angstrom)-----------------------------\n'
+note1 = '  #T1'
+note2 = '               #T1 life'
 work_dir = root_dir+'/t1/'
 os.chdir(work_dir)
 for files in os.listdir(work_dir):
   if re.match(r'.*\.log',files):
     fname = files
     break
-parseLogS1T1(fname,tokens)
+parseLogS1T1(fname)
 

@@ -1,7 +1,11 @@
 #/usr/bin/python
 import re
 import os
-import sys     
+import sys   
+def strTo13(vib):
+  num = 13 - len(vib)
+  temp = ' '*num
+  return temp+vib
 def parseLogS0(fname):
   #
   #begin to parse *.com file to obtain atom symbol, atom number and charge of molecular
@@ -308,18 +312,19 @@ def parseLogS0(fname):
     if frequencies:
       for i in frequencies:
         i=i.rstrip()
-        print i
         temp = i.split(' ')
         for j in temp:
+          t1 = '%.6f' % float(j)
+          t1=strTo13(t1)
           out_object.write(' ')
-          out_object.write('%.6f' % float(j))
+          out_object.write(t1)
           out_object.write('  ')
         out_object.write('\n')
     out_object.write('------------------------------Vibration Modes---------------------------------------------------------------------------\n')
     if vibration:
       for i in vibration:
         for j in i:
-          #out_object.write(' ')
+          out_object.write(' ')
           for k in j:
             if float(k)<0:
               out_object.write('%.6f' % float(k))

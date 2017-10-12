@@ -2,36 +2,37 @@
 import re
 import os
 import sys     
-def parseCom(fname):
-  #fname = os.path.basename(fname)
+def parseLogS0(fname):
+  #
+  #begin to parse *.com file to obtain atom symbol, atom number and charge of molecular
   atom_syb = []
   temp = fname.split('.')
-  fname = temp[0]+'.com'
-  in_object = open(fname,'r')
-  while 1:
-    line = in_object.readline()
-    if not line:
-      break
-    res = re.match(r'[0-9]\s*[0-9]',line)
-    if res:
-      temp = line.split(' ')
-      atom_syb.append(temp[0])
-    res = re.match(r'[^0-9]((\s*)(-*)([0-9]+(\.+)[0-9]*)(.*)){3}',line)
-    if res:
-      temp = line.split(' ')
-      atom_syb.append(temp[0])
-  in_object.close()
-  return atom_syb
-  
-def parseLogS0(fname):
-  work_dir = root_dir+'s0/'
-  os.chdir(work_dir)
-  atom_syb = parseCom(fname)
+  fname1 = temp[0]+'.com'
+  with open(fname1,'r') as in_object:
+    while 1:
+      line = in_object.readline()
+      if not line:
+        break
+      #find charge value in .com file
+      res = re.match(r'[0-9]\s*[0-9]',line)  
+      if res:
+        temp = line.split(' ')
+        atom_syb.append(temp[0])
+      #find atom symbol in .com file
+      res = re.match(r'[^0-9]((\s*)(-*)([0-9]+(\.+)[0-9]*)(.*)){3}',line)
+      if res:
+        temp = line.split(' ')
+        atom_syb.append(temp[0])
   charge = atom_syb[0]
   atom_num = len(atom_syb)-1
-  temp = fname.split('_')
-  molecular = temp[1]
-  number = temp[0]
+  #end to parse *.com file
+  #
+
+  #
+  base_name = os.path.basename(fname)
+  temp = base_name.split('_')
+  molecular = temp[1] #molecular symbol
+  number = temp[0]    #file number in gdb
   temp = []
   mulliken = []
   atom_pos = []
@@ -39,8 +40,9 @@ def parseLogS0(fname):
   frequency = ''
   frequencies = []
   vibration = []
-  res_list = []
-  # m
+  #varible to store 17 basic properties
+  res_list = []       
+  #medium varibles
   res_list1 = []
   res_list2 = []
   res_list3 = []
@@ -56,6 +58,9 @@ def parseLogS0(fname):
   res_list13 = []
   res_list14 = []
   i = 0
+  #begin to parse *.log file 
+  #
+  #
   with open(fname,'r') as in_object:
     while 1:
       line = in_object.readline()
@@ -159,7 +164,7 @@ def parseLogS0(fname):
         vibration.append(temp_list2)
         vibration.append(temp_list3)
         #print vibration
-        
+      #find atom mass  
       res = re.match(r'.*Temperature',line)
       if res:
         j = 0
@@ -167,7 +172,9 @@ def parseLogS0(fname):
           line = in_object.readline()
           res_list14.append(line)
           j+=1
-        
+  #end parse *.log file
+  #
+  #begin to obtain ground state data from raw data            
   for i in range(atom_num):
     atom_pos.append(res_list12[-1-i])
   str1 = re.compile(r'-*\d+\.\d+')
@@ -205,6 +212,10 @@ def parseLogS0(fname):
   for i in res_list14:
     temp = i.split(' ')
     atom_mass.append(temp[-1])
+  #end obtain ground state data from raw data
+  #
+  #begin to write properties to *.mols file
+  # 
   with open(out_file,'w') as out_object:
     out_object.write('------------------------------Chemical Formula and Charge---------------------------------------------------------------\n')
     out_object.write(' ')
@@ -283,6 +294,8 @@ def parseLogS0(fname):
             out_object.write('%.6f' % float(k))
             out_object.write('  ')
         out_object.write('\n')   
+  #end write properties to *.mols file
+  #
     #out_object.write('------------------------------Excited State T1: energy(Ha),lifetime(au),structure(Angstrom)-----------------------------\n')
   
     #out_object.write('------------------------------Emitting Efficiency-----------------------------------------------------------------------\n')
@@ -293,8 +306,30 @@ def parseLogS0(fname):
   #  out_object.write('------------------------------End---------------------------------------------------------------------------------------\n')
 
 def parseLogS1T1(fname):
-  atom_syb = parseCom(fname)
+  #
+  #begin to parse *.com file to obtain atom symbol, atom number and charge of molecular
+  atom_syb = []
+  temp = fname.split('.')
+  fname1 = temp[0]+'.com'
+  with open(fname1,'r') as in_object:
+    while 1:
+      line = in_object.readline()
+      if not line:
+        break
+      #find charge value in .com file
+      res = re.match(r'[0-9]\s*[0-9]',line)  
+      if res:
+        temp = line.split(' ')
+        atom_syb.append(temp[0])
+      #find atom symbol in .com file
+      res = re.match(r'[^0-9]((\s*)(-*)([0-9]+(\.+)[0-9]*)(.*)){3}',line)
+      if res:
+        temp = line.split(' ')
+        atom_syb.append(temp[0])
+  charge = atom_syb[0]
   atom_num = len(atom_syb)-1
+  #end to parse *.com file
+  #
   #energy_s1  = []
   atom_pos  = []
   res_list1 = []
@@ -377,6 +412,7 @@ for files in os.listdir(work_dir):
     break
 temp = fname.split('_')
 out_file = root_dir+temp[0]+'_'+temp[1]+'.mols'
+fname = work_dir + fname
 parseLogS0(fname)
 
 tokens = '------------------------------Excited State S1: energy(Ha),lifetime(au),structure(Angstrom)-----------------------------\n'
@@ -388,6 +424,7 @@ for files in os.listdir(work_dir):
   if re.match(r'.*\.log',files):
     fname = files
     break
+fname = work_dir + fname
 parseLogS1T1(fname)
 
 tokens = '------------------------------Excited State T1: energy(Ha),lifetime(au),structure(Angstrom)-----------------------------\n'
@@ -399,5 +436,6 @@ for files in os.listdir(work_dir):
   if re.match(r'.*\.log',files):
     fname = files
     break
+fname = work_dir + fname
 parseLogS1T1(fname)
 

@@ -8,6 +8,7 @@ def parseLogS0(fname):
   atom_syb = []
   temp = fname.split('.')
   fname1 = temp[0]+'.com'
+  #print fname1
   with open(fname1,'r') as in_object:
     while 1:
       line = in_object.readline()
@@ -126,11 +127,13 @@ def parseLogS0(fname):
           j+=1
       res = re.match(r'.*Frequencies',line)
       if res:
+        frequency = ''
         res_list15 = []
         str1 = re.compile(r'-*\d+\.\d+')
         temp = str1.findall(line)
         for i in temp:
            frequency =i+' '+frequency
+        #print frequency
         frequencies.append(frequency)
         line = in_object.readline()
         line = in_object.readline()
@@ -145,24 +148,31 @@ def parseLogS0(fname):
           line = in_object.readline()
           str1 = re.compile(r'-*\d+\.\d+')
           temp = str1.findall(line)
-          temp_list.append(temp[0])
-          temp_list.append(temp[1])
-          temp_list.append(temp[2])
-          temp_list1.append(temp_list)
+          #print temp
+          if len(temp)/3 >= 1:
+            temp_list.append(temp[0])
+            temp_list.append(temp[1])
+            temp_list.append(temp[2])
+            temp_list1.append(temp_list)
           temp_list = []
-          temp_list.append(temp[3])
-          temp_list.append(temp[4])
-          temp_list.append(temp[5])
-          temp_list2.append(temp_list)
+          if len(temp)/3 >=2:
+            temp_list.append(temp[3])
+            temp_list.append(temp[4])
+            temp_list.append(temp[5])
+            temp_list2.append(temp_list)
           temp_list = []
-          temp_list.append(temp[6])
-          temp_list.append(temp[7])
-          temp_list.append(temp[8])
-          temp_list3.append(temp_list)
+          if len(temp)/3 ==3:
+            temp_list.append(temp[6])
+            temp_list.append(temp[7])
+            temp_list.append(temp[8])
+            temp_list3.append(temp_list)
           j+=1
-        vibration.append(temp_list1)
-        vibration.append(temp_list2)
-        vibration.append(temp_list3)
+        if temp_list1:
+          vibration.append(temp_list1)
+        if temp_list2: 
+          vibration.append(temp_list2)
+        if temp_list3:
+          vibration.append(temp_list3)
         #print vibration
       #find atom mass  
       res = re.match(r'.*Temperature',line)
@@ -174,44 +184,62 @@ def parseLogS0(fname):
           j+=1
   #end parse *.log file
   #
-  #begin to obtain ground state data from raw data            
-  for i in range(atom_num):
-    atom_pos.append(res_list12[-1-i])
+  #begin to obtain ground state data from raw data 
+  #print res_list12 
+  if res_list12:          
+    for i in range(atom_num):
+      atom_pos.append(res_list12[-1-i])
+  else:
+    print molecular_dir
   str1 = re.compile(r'-*\d+\.\d+')
-  temp = str1.findall(res_list1[-1])
-  for i in temp:
-    res_list.append(i)
-  temp = str1.findall(res_list2[-1])
-  res_list.append(temp[-1])
-  temp = str1.findall(res_list3[-1])
-  res_list.append(temp[-1])
-  temp = str1.findall(res_list4[-4])
-  res_list.append(temp[-1])
-  temp = str1.findall(res_list4[-3])
-  res_list.append(temp[0])
-  lumo = float(res_list[-1])
-  homo = float(res_list[-2])
-  res_list.append(lumo-homo)
-  temp = str1.findall(res_list5[-1])
-  res_list.append(temp[-1])
-  temp = str1.findall(res_list6[-1])
-  res_list.append(temp[-1])
-  temp = str1.findall(res_list7[-1])
-  res_list.append(temp[-1])
-  temp = str1.findall(res_list8[-1])
-  res_list.append(temp[-1])
-  temp = str1.findall(res_list9[-1])
-  res_list.append(temp[-1])
-  temp = str1.findall(res_list10[-1])
-  res_list.append(temp[-1])
-  temp = str1.findall(res_list11[-1])
-  res_list.append(temp[-2])
-  for i in range(atom_num):
-    temp = res_list13[-1-i].split(' ')
-    mulliken.append(temp[-1])
-  for i in res_list14:
-    temp = i.split(' ')
-    atom_mass.append(temp[-1])
+  if res_list1:
+    temp = str1.findall(res_list1[-1])
+    for i in temp:
+      res_list.append(i)
+  if res_list2:
+    temp = str1.findall(res_list2[-1])
+    res_list.append(temp[-1])
+  if res_list3:
+    temp = str1.findall(res_list3[-1])
+    res_list.append(temp[-1])
+  if res_list4:
+    temp = str1.findall(res_list4[-4])
+    res_list.append(temp[-1])
+  if res_list5:
+    temp = str1.findall(res_list4[-3])
+    res_list.append(temp[0])
+    lumo = float(res_list[-1])
+    homo = float(res_list[-2])
+    res_list.append(lumo-homo)
+  if res_list5:
+    temp = str1.findall(res_list5[-1])
+    res_list.append(temp[-1])
+  if res_list6:
+    temp = str1.findall(res_list6[-1])
+    res_list.append(temp[-1])
+  if res_list7:
+    temp = str1.findall(res_list7[-1])
+    res_list.append(temp[-1])
+  if res_list8:
+    temp = str1.findall(res_list8[-1])
+    res_list.append(temp[-1])
+  if res_list9:
+    temp = str1.findall(res_list9[-1])
+    res_list.append(temp[-1])
+  if res_list10:
+    temp = str1.findall(res_list10[-1])
+    res_list.append(temp[-1])
+  if res_list11:
+    temp = str1.findall(res_list11[-1])
+    res_list.append(temp[-2])
+  if res_list13:
+    for i in range(atom_num):
+      temp = res_list13[-1-i].split(' ')
+      mulliken.append(temp[-1])
+  if res_list14:
+    for i in res_list14:
+      temp = i.split(' ')
+      atom_mass.append(temp[-1])
   #end obtain ground state data from raw data
   #
   #begin to write properties to *.mols file
@@ -226,74 +254,81 @@ def parseLogS0(fname):
     out_object.write('--tag--index---A---B---C----dipole--isotropic--homo--lumo--gap--r2------zpve--U0--U--H--G--Cv---------------------------\n')
     out_object.write('--xxx--XXXXXX--GHz-GHz-Ghz--Debye---Bohr^3-----Ha----Ha----Ha---Bohr^2--Ha----Ha--Ha-Ha-Ha-cal/(mol K)------------------\n')
     out_object.write(' gdb  '+number+'  ')
-    for i in res_list:
-      out_object.write('%.6f' % float(i))
-      out_object.write('  ')
-    out_object.write('\n')
+    if res_list:
+      for i in res_list:
+        out_object.write('%.6f' % float(i))
+        out_object.write('  ')
+      out_object.write('\n')
     out_object.write('------------------------------Element,XYZ (Angstrom)--------------------------------------------------------------------\n')
     temp = str(atom_num)
     out_object.write(' '+temp+'\n')
     str1 = re.compile(r'-*\d+\.*\d*')
-    for i in range(atom_num):
-      temp = str1.findall(atom_pos[-1-i])
-      #print temp
-      out_object.write(' '+atom_syb[i+1]+'  ')
-      if float(temp[3])<0:
-        out_object.write('%.6f' % float(temp[3]))
-        out_object.write('  ')
-      else:
-        out_object.write(' ')
-        out_object.write('%.6f' % float(temp[3]))
-        out_object.write('  ')
-      if float(temp[4])<0:
-        out_object.write('%.6f' % float(temp[4]))
-        out_object.write('  ')
-      else:
-        out_object.write(' ')
-        out_object.write('%.6f' % float(temp[4]))
-        out_object.write('  ')
-      if float(temp[5])<0:
-        out_object.write('%.6f' % float(temp[5]))
-        out_object.write('  ')
-      else:
-        out_object.write(' ')
-        out_object.write('%.6f' % float(temp[5]))
-        out_object.write('  ')
-      out_object.write('\n')
+    if atom_pos:
+      for i in range(atom_num):
+        temp = str1.findall(atom_pos[-1-i])
+        #print temp
+        out_object.write(' '+atom_syb[i+1]+'  ')
+        if float(temp[3])<0:
+          out_object.write('%.6f' % float(temp[3]))
+          out_object.write('  ')
+        else:
+          out_object.write(' ')
+          out_object.write('%.6f' % float(temp[3]))
+          out_object.write('  ')
+        if float(temp[4])<0:
+          out_object.write('%.6f' % float(temp[4]))
+          out_object.write('  ')
+        else:
+          out_object.write(' ')
+          out_object.write('%.6f' % float(temp[4]))
+          out_object.write('  ')
+        if float(temp[5])<0:
+          out_object.write('%.6f' % float(temp[5]))
+          out_object.write('  ')
+        else:
+          out_object.write(' ')
+          out_object.write('%.6f' % float(temp[5]))
+          out_object.write('  ')
+        out_object.write('\n')
     out_object.write('------------------------------Mulliken Partial Charge (|e|)-------------------------------------------------------------\n')
-    for i in mulliken:
-      out_object.write(' ')
-      out_object.write('%.6f' % float(i))
-      out_object.write('  ')
-    out_object.write('\n')
-    out_object.write('------------------------------Atom Mass (Relative atomic mass)----------------------------------------------------------\n')
-    for i in atom_mass:
-      out_object.write(' ')
-      out_object.write('%.6f' % float(i))
-      out_object.write('  ')
-    out_object.write('\n')
-    out_object.write('------------------------------Vibration Frequency (cm-1)----------------------------------------------------------------\n')
-    for i in frequencies:
-      i=i.rstrip()
-      temp = i.split(' ')
-      for j in temp:
+    if mulliken:
+      for i in mulliken:
         out_object.write(' ')
-        out_object.write('%.6f' % float(j))
+        out_object.write('%.6f' % float(i))
         out_object.write('  ')
       out_object.write('\n')
+    out_object.write('------------------------------Atom Mass (Relative atomic mass)----------------------------------------------------------\n')
+    if atom_mass:
+      for i in atom_mass:
+        out_object.write(' ')
+        out_object.write('%.6f' % float(i))
+        out_object.write('  ')
+      out_object.write('\n')
+    out_object.write('------------------------------Vibration Frequency (cm-1)----------------------------------------------------------------\n')
+    if frequencies:
+      for i in frequencies:
+        i=i.rstrip()
+        print i
+        temp = i.split(' ')
+        for j in temp:
+          out_object.write(' ')
+          out_object.write('%.6f' % float(j))
+          out_object.write('  ')
+        out_object.write('\n')
     out_object.write('------------------------------Vibration Modes---------------------------------------------------------------------------\n')
-    for i in vibration:
-      for j in i:
-        #out_object.write(' ')
-        for k in j:
-          if float(k)<0:
-            out_object.write('%.6f' % float(k))
-            out_object.write('  ')
-          else:
-            out_object.write(' ')
-            out_object.write('%.6f' % float(k))
-            out_object.write('  ')
-        out_object.write('\n')   
+    if vibration:
+      for i in vibration:
+        for j in i:
+          #out_object.write(' ')
+          for k in j:
+            if float(k)<0:
+              out_object.write('%.6f' % float(k))
+              out_object.write('  ')
+            else:
+              out_object.write(' ')
+              out_object.write('%.6f' % float(k))
+              out_object.write('  ')
+          out_object.write('\n')   
   #end write properties to *.mols file
   #
     #out_object.write('------------------------------Excited State T1: energy(Ha),lifetime(au),structure(Angstrom)-----------------------------\n')
@@ -356,86 +391,105 @@ def parseLogS1T1(fname):
           line = in_object.readline()
           j+=1
   str1 = re.compile(r'-*\d+\.\d+')
-  temp = str1.findall(res_list1[-1])
-  energy_s1 = temp[-1]
-  for i in range(atom_num):
-    atom_pos.append(res_list2[-1-i])
+  if res_list1:
+    temp = str1.findall(res_list1[-1])
+    energy_s1 = temp[-1]
+  if res_list2:
+    for i in range(atom_num):
+      atom_pos.append(res_list2[-1-i])
 
   with open(out_file,'a') as out_object:
     out_object.write(tokens)
     out_object.write(' '+energy_s1+note1+'\n')
     out_object.write(note2+'\n')
     str1 = re.compile(r'-*\d+\.*\d*')
-    for i in range(atom_num):
-      temp = str1.findall(atom_pos[-1-i])
-      #print temp
-      out_object.write(' '+atom_syb[i+1]+'  ')
-      if float(temp[3])<0:
-        out_object.write('%.6f' % float(temp[3]))
-        out_object.write('  ')
-      else:
-        out_object.write(' ')
-        out_object.write('%.6f' % float(temp[3]))
-        out_object.write('  ')
-      if float(temp[4])<0:
-        out_object.write('%.6f' % float(temp[4]))
-        out_object.write('  ')
-      else:
-        out_object.write(' ')
-        out_object.write('%.6f' % float(temp[4]))
-        out_object.write('  ')
-      if float(temp[5])<0:
-        out_object.write('%.6f' % float(temp[5]))
-        out_object.write('  ')
-      else:
-        out_object.write(' ')
-        out_object.write('%.6f' % float(temp[5]))
-        out_object.write('  ')
-      out_object.write('\n')
+    if atom_pos:
+      for i in range(atom_num):
+        temp = str1.findall(atom_pos[-1-i])
+        #print temp
+        out_object.write(' '+atom_syb[i+1]+'  ')
+        if float(temp[3])<0:
+          out_object.write('%.6f' % float(temp[3]))
+          out_object.write('  ')
+        else:
+          out_object.write(' ')
+          out_object.write('%.6f' % float(temp[3]))
+          out_object.write('  ')
+        if float(temp[4])<0:
+          out_object.write('%.6f' % float(temp[4]))
+          out_object.write('  ')
+        else:
+          out_object.write(' ')
+          out_object.write('%.6f' % float(temp[4]))
+          out_object.write('  ')
+        if float(temp[5])<0:
+          out_object.write('%.6f' % float(temp[5]))
+          out_object.write('  ')
+        else:
+          out_object.write(' ')
+          out_object.write('%.6f' % float(temp[5]))
+          out_object.write('  ')
+        out_object.write('\n')
 
 def parseXyz(fname):
   with open(fname,'r') as in_object:
     lines = in_object.readlines()
     temp = lines[-2]
-    temp.split(' ')
+    temp = temp.split()
     return temp[0]
 
-root_dir = '/home/qhuang/HzwDb/gdb/000003_H2O/'
-os.system('cd '+root_dir)
-smiles = parseXyz('000003_H2O.xyz')
 
-work_dir = root_dir+'s0/'
-os.system('cd '+work_dir)
-for files in os.listdir(work_dir):
-  if re.match(r'.*\.log',files):
-    fname = files
-    break
-temp = fname.split('_')
-out_file = root_dir+temp[0]+'_'+temp[1]+'.mols'
-fname = work_dir + fname
-parseLogS0(fname)
+root_dir = '/home/qhuang/HzwDb/gdb/'
 
-tokens = '------------------------------Excited State S1: energy(Ha),lifetime(au),structure(Angstrom)-----------------------------\n'
-note1 = '  #S1'
-note2 = '               #S1 life'
-work_dir = root_dir+'/s1/'
-os.chdir(work_dir)
-for files in os.listdir(work_dir):
-  if re.match(r'.*\.log',files):
-    fname = files
-    break
-fname = work_dir + fname
-parseLogS1T1(fname)
+for dirs in os.listdir(root_dir):
+  molecular_dir = root_dir + dirs + '/'
+  #print molecular_dir
+  #print dirs
+  for files in os.listdir(molecular_dir):
+    if re.match(r'.*\.xyz',files):
+      fname = molecular_dir+files
+      break
+  #print fname
+  smiles = parseXyz(fname)
 
-tokens = '------------------------------Excited State T1: energy(Ha),lifetime(au),structure(Angstrom)-----------------------------\n'
-note1 = '  #T1'
-note2 = '               #T1 life'
-work_dir = root_dir+'/t1/'
-os.chdir(work_dir)
-for files in os.listdir(work_dir):
-  if re.match(r'.*\.log',files):
-    fname = files
-    break
-fname = work_dir + fname
-parseLogS1T1(fname)
+
+  work_dir = molecular_dir+'s0/'
+  os.system('cd '+work_dir)
+  for files in os.listdir(work_dir):
+    if re.match(r'.*\.log',files):
+      fname = files
+      break
+  if re.match(r'.*\.log',fname):
+    temp = fname.split('_')
+    out_file = molecular_dir+temp[0]+'_'+temp[1]+'.mols'
+    fname = work_dir + fname
+    parseLogS0(fname)
+  else:
+    print molecular_dir
+  
+  tokens = '------------------------------Excited State S1: energy(Ha),lifetime(au),structure(Angstrom)-----------------------------\n'
+  note1 = '  #S1'
+  note2 = '               #S1 life'
+  work_dir = molecular_dir+'/s1/'
+  os.chdir(work_dir)
+  for files in os.listdir(work_dir):
+    if re.match(r'.*\.log',files):
+      fname = files
+      break
+  if re.match(r'.*\.log',fname):
+    fname = work_dir + fname
+    parseLogS1T1(fname)
+  
+  tokens = '------------------------------Excited State T1: energy(Ha),lifetime(au),structure(Angstrom)-----------------------------\n'
+  note1 = '  #T1'
+  note2 = '               #T1 life'
+  work_dir = molecular_dir+'/t1/'
+  os.chdir(work_dir)
+  for files in os.listdir(work_dir):
+    if re.match(r'.*\.log',files):
+      fname = files
+      break
+  if re.match(r'.*\.log',fname):
+    fname = work_dir + fname
+    parseLogS1T1(fname)
 

@@ -435,7 +435,7 @@ def parseLogS1T1(fname):
           out_object.write('%.6f' % float(temp[5]))
           out_object.write('  ')
         out_object.write('\n')
-
+#parse *.xyz file to obtain SMILES
 def parseXyz(fname):
   with open(fname,'r') as in_object:
     lines = in_object.readlines()

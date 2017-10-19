@@ -199,34 +199,36 @@ def parseLogS0(fname):
   if res_list1:
     temp = str1.findall(res_list1[-1])
     for i in temp:
-      res_list.append(i)
+      res_list.append(i)   #res_list[0],[1],[2] Rotational constant A B C
   if res_list2:
     temp = str1.findall(res_list2[-1])
-    res_list.append(temp[-1])
+    res_list.append(temp[-1])  #res_list[3] Dipole moment mu
   if res_list3:
     temp = str1.findall(res_list3[-1])
-    res_list.append(temp[-1])
+    res_list.append(temp[-1])  #res_list[4] Isotropic polarizability alpha
   if res_list4:
     temp = str1.findall(res_list4[-4])
-    res_list.append(temp[-1])
+    res_list.append(temp[-1])  #res_list[5] homo
   if res_list5:
     temp = str1.findall(res_list4[-3])
-    res_list.append(temp[0])
+    res_list.append(temp[0])   #res_list[6] lomo
     lumo = float(res_list[-1])
     homo = float(res_list[-2])
-    res_list.append(lumo-homo)
+    res_list.append(lumo-homo)  #res_list[7] gap
   if res_list5:
     temp = str1.findall(res_list5[-1])
-    res_list.append(temp[-1])
+    res_list.append(temp[-1])  #res_list[8] r2
   if res_list6:
     temp = str1.findall(res_list6[-1])
-    res_list.append(temp[-1])
+    temp = float(temp[-1])/627.51
+    temp = str(temp)
+    res_list.append(temp)   #res_list[9] zpve
   if res_list7:
     temp = str1.findall(res_list7[-1])
-    res_list.append(temp[-1])
+    res_list.append(temp[-1])   #res_list[10] SCF Done U0
   if res_list8:
     temp = str1.findall(res_list8[-1])
-    res_list.append(temp[-1])
+    res_list.append(temp[-1])   #res_list[11] 
   if res_list9:
     temp = str1.findall(res_list9[-1])
     res_list.append(temp[-1])
@@ -345,7 +347,7 @@ def parseLogS0(fname):
   
   #  out_object.write('------------------------------End---------------------------------------------------------------------------------------\n')
 
-def parseLogS1T1(fname):
+def parseLogS1T1(fname,states):
   #
   #begin to parse *.com file to obtain atom symbol, atom number and charge of molecular
   atom_syb = []
@@ -380,7 +382,10 @@ def parseLogS1T1(fname):
       line = in_object.readline()
       if not line:
         break
-      res = re.match(r' SCF Done',line)
+      if states == 's1':
+        res = re.match(r' Total Energy',line)
+      if states == 't1':
+        res = re.match(r' SCF Done',line)
       if res:
         res_list1.append(line)
       res = re.match(r'.*Standard orientation',line)
@@ -483,7 +488,7 @@ for dirs in os.listdir(root_dir):
       break
   if re.match(r'.*\.log',fname):
     fname = work_dir + fname
-    parseLogS1T1(fname)
+    parseLogS1T1(fname,'s1')
   
   tokens = '------------------------------Excited State T1: energy(Ha),lifetime(au),structure(Angstrom)-----------------------------\n'
   note1 = '  #T1'
@@ -496,5 +501,5 @@ for dirs in os.listdir(root_dir):
       break
   if re.match(r'.*\.log',fname):
     fname = work_dir + fname
-    parseLogS1T1(fname)
+    parseLogS1T1(fname,'t1')
 

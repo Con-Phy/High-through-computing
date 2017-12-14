@@ -1,4 +1,5 @@
 import os
+import re
 import shutil
 from time import sleep
 class GaussianJobControl():
@@ -7,14 +8,25 @@ class GaussianJobControl():
     self.root_dir = root_dir
 
   def generate_files(molecular_dir):
-
+    dirs = molecular_dir+'/s0'
     os.chdir(molecular_dir)
-    os.mkdir('s0')
-    os.mkdir('s1')
-    os.mkdir('t1')
-    os.mkdir('nacme')
-    os.mkdir('numfraq')
-    os.mkdir('optic')
+    if os.path.exists(dirs):
+      os.mkdir('s0')
+    dirs = molecular_dir+'/s1'
+    if os.path.exists(dirs):
+      os.mkdir('s1')
+    dirs = molecular_dir+'/t1'
+    if os.path.exists(dirs):
+      os.mkdir('t1')
+    dirs = molecular_dir+'/nacme'
+    if os.path.exists(dirs):
+      os.mkdir('nacme')
+    dirs = molecular_dir+'/numfraq'
+    if os.path.exists(dirs):
+      os.mkdir('numfraq')
+    dirs = molecular_dir+'/optic'
+    if os.path.exists(dirs):
+      os.mkdir('optic')
   
   def generate_input(files,dirs,states,cores):
     out_dir = os.path.join(dirs,states)
@@ -140,7 +152,7 @@ class GaussianJobControl():
               break
           sleep(180)
           numofjob = sum(1 for line in open('/home/qhuang/HzwDb/jobnumber/job.log'))
-        sleep(2)
+        sleep(5)
         numofjob = sum(1 for line in open('/home/qhuang/HzwDb/jobnumber/job.log'))
         while 1:
           if numofjob<52:
@@ -153,7 +165,7 @@ class GaussianJobControl():
               break
           sleep(180)
           numofjob = sum(1 for line in open('/home/qhuang/HzwDb/jobnumber/job.log'))
-        sleep(2)
+        sleep(5)
         numofjob = sum(1 for line in open('/home/qhuang/HzwDb/jobnumber/job.log'))
         while 1:
           if numofjob<52:
@@ -166,7 +178,7 @@ class GaussianJobControl():
               break
           sleep(180)
           numofjob = sum(1 for line in open('/home/qhuang/HzwDb/jobnumber/job.log'))
-        sleep(2)
+        sleep(5)
 
   def str_to_13(via):
   	num = 13 - len(vib)
@@ -656,6 +668,31 @@ class GaussianJobControl():
         if re.match(r'.*\.log',fname):
           fname = work_dir + fname
           parse_log_s1t1(fname,'t1')
+
+  def error_handle():
+    desti_dir = '/home/qhuang/HzwDb/gdb_error/'
+    n=0
+    for dirs in os.listdir(self.root_dir):
+      molsfile = self.root_dir+'/'+dirs+'/'+dirs+'.mols'
+      dirs = self.root_dir+'/'+dirs
+      if not os.path.isfile(molsfile):
+        for files in os.walk(dirs):
+          for name in files[2]:
+            if re.match(r'.*\.log',name,flags=0):
+              os.chdir(files[0])
+              process = os.popen("grep 'Error termination' "+name)
+              errorinfo = process.read()
+              process.close()
+              if errorinfo:
+                n = n+1
+                if os.path.exists(dirs):
+                  os.system('mv '+dirs +' '+desti_dir)
+                  #with open('/home/qhuang/HzwDb/error.txt','a') as file:
+                    #file.write(dirs)
+                    #file.write('\n')
+                  #file.write(errorinfo)
+                  #file.write('\n')
+    print(n)
 
 
 

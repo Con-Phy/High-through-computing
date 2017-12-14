@@ -669,7 +669,7 @@ class GaussianJobControl():
           fname = work_dir + fname
           parse_log_s1t1(fname,'t1')
 
-  def error_handle():
+  def error_handle(self):
     desti_dir = '/home/qhuang/HzwDb/gdb_error/'
     n=0
     for dirs in os.listdir(self.root_dir):

@@ -7,6 +7,7 @@ class GaussianJobControl():
     self.root_dir = root_dir
 
   def generate_files(molecular_dir):
+
     os.chdir(molecular_dir)
     os.mkdir('s0')
     os.mkdir('s1')
@@ -125,7 +126,7 @@ class GaussianJobControl():
         os.chdir(root_dir)
         os.mkdir(molecular_dir)
         shutil.move(files,molecular_dir)
-        genfiles.generate_files(molecular_dir)
+        generate_files(molecular_dir)
         numofjob = sum(1 for line in open('/home/qhuang/HzwDb/jobnumber/job.log'))
       
         while 1:
@@ -135,7 +136,7 @@ class GaussianJobControl():
           	if b<52:
               if os.path.exists(molecular_dir):
                 os.chdir(molecular_dir)
-                geninput.generate_input(files,molecular_dir,'s0',self.cores)
+                generate_input(files,molecular_dir,'s0',self.cores)
               break
           sleep(180)
           numofjob = sum(1 for line in open('/home/qhuang/HzwDb/jobnumber/job.log'))
@@ -148,7 +149,7 @@ class GaussianJobControl():
           	if b<52:
               if os.path.exists(molecular_dir):
                 os.chdir(molecular_dir)
-                geninput.generate_input(files,molecular_dir,'s1',self.cores)
+                generate_input(files,molecular_dir,'s1',self.cores)
               break
           sleep(180)
           numofjob = sum(1 for line in open('/home/qhuang/HzwDb/jobnumber/job.log'))
@@ -161,7 +162,7 @@ class GaussianJobControl():
           	if b<52:
               if os.path.exists(molecular_dir):
                 os.chdir(molecular_dir)
-                geninput.generate_input(files,molecular_dir,'t1',self.cores)
+                generate_input(files,molecular_dir,'t1',self.cores)
               break
           sleep(180)
           numofjob = sum(1 for line in open('/home/qhuang/HzwDb/jobnumber/job.log'))

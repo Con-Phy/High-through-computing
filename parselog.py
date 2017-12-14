@@ -453,53 +453,56 @@ root_dir = '/home/qhuang/HzwDb/gdb/'
 
 for dirs in os.listdir(root_dir):
   molecular_dir = root_dir + dirs + '/'
-  #print molecular_dir
-  #print dirs
-  for files in os.listdir(molecular_dir):
-    if re.match(r'.*\.xyz',files):
-      fname = molecular_dir+files
-      break
-  #print fname
-  smiles = parseXyz(fname)
-
-
-  work_dir = molecular_dir+'s0/'
-  os.system('cd '+work_dir)
-  for files in os.listdir(work_dir):
-    if re.match(r'.*\.log',files):
-      fname = files
-      break
-  if re.match(r'.*\.log',fname):
-    temp = fname.split('_')
-    out_file = molecular_dir+temp[0]+'_'+temp[1]+'.mols'
-    fname = work_dir + fname
-    parseLogS0(fname)
-  else:
-    print molecular_dir
+  molsfile = root_dir+dirs+'/'+dirs+'.mols'
+  if not os.path.isfile(molsfile):
+    #print molecular_dir
+    #print dirs
+    #for files in os.listdir(molecular_dir):
+    #  if re.match(r'.*\.xyz',files):
+    #    fname = molecular_dir+files
+    #    break
+    #print fname
+    fname = molecular_dir+dirs+'.xyz'
+    smiles = parseXyz(fname)
   
-  tokens = '------------------------------Excited State S1: energy(Ha),lifetime(au),structure(Angstrom)-----------------------------\n'
-  note1 = '  #S1'
-  note2 = '               #S1 life'
-  work_dir = molecular_dir+'/s1/'
-  os.chdir(work_dir)
-  for files in os.listdir(work_dir):
-    if re.match(r'.*\.log',files):
-      fname = files
-      break
-  if re.match(r'.*\.log',fname):
-    fname = work_dir + fname
-    parseLogS1T1(fname,'s1')
   
-  tokens = '------------------------------Excited State T1: energy(Ha),lifetime(au),structure(Angstrom)-----------------------------\n'
-  note1 = '  #T1'
-  note2 = '               #T1 life'
-  work_dir = molecular_dir+'/t1/'
-  os.chdir(work_dir)
-  for files in os.listdir(work_dir):
-    if re.match(r'.*\.log',files):
-      fname = files
-      break
-  if re.match(r'.*\.log',fname):
-    fname = work_dir + fname
-    parseLogS1T1(fname,'t1')
+    work_dir = molecular_dir+'s0/'
+    os.system('cd '+work_dir)
+    for files in os.listdir(work_dir):
+      if re.match(r'.*\.log',files):
+        fname = files
+        break
+    if re.match(r'.*\.log',fname):
+      temp = fname.split('_')
+      out_file = molecular_dir+temp[0]+'_'+temp[1]+'.mols'
+      fname = work_dir + fname
+      parseLogS0(fname)
+    else:
+      print molecular_dir
+    
+    tokens = '------------------------------Excited State S1: energy(Ha),lifetime(au),structure(Angstrom)-----------------------------\n'
+    note1 = '  #S1'
+    note2 = '               #S1 life'
+    work_dir = molecular_dir+'/s1/'
+    os.chdir(work_dir)
+    for files in os.listdir(work_dir):
+      if re.match(r'.*\.log',files):
+        fname = files
+        break
+    if re.match(r'.*\.log',fname):
+      fname = work_dir + fname
+      parseLogS1T1(fname,'s1')
+    
+    tokens = '------------------------------Excited State T1: energy(Ha),lifetime(au),structure(Angstrom)-----------------------------\n'
+    note1 = '  #T1'
+    note2 = '               #T1 life'
+    work_dir = molecular_dir+'/t1/'
+    os.chdir(work_dir)
+    for files in os.listdir(work_dir):
+      if re.match(r'.*\.log',files):
+        fname = files
+        break
+    if re.match(r'.*\.log',fname):
+      fname = work_dir + fname
+      parseLogS1T1(fname,'t1')
 

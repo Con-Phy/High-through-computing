@@ -9,7 +9,7 @@ class GaussianJobControl():
     self.root_dir = root_dir
     self.cpu_cores = cpu_cores
 
-  def generate_files(self,molecular_dir):
+  def __generate_folders(self,molecular_dir):
     dirs = molecular_dir+'/s0'
     os.chdir(molecular_dir)
     if not os.path.exists(dirs):
@@ -30,7 +30,7 @@ class GaussianJobControl():
     if not os.path.exists(dirs):
       os.mkdir('optic')
   
-  def generate_input(self,files,dirs,states,cores):
+  def __generate_input(self,files,dirs,states,cores):
     out_dir = os.path.join(dirs,states)
     g09_parameters = []
     memories = '4'
@@ -115,7 +115,7 @@ class GaussianJobControl():
             out_object.write('%.10f' % float(temp[3]))
           out_object.write('\n')
         else:
-          print line
+          print(line)
           desti_dir = '/home/qhuang/HzwDb/gdb_error/'
           os.system('mv '+dirs +' '+desti_dir)
           return
@@ -126,7 +126,7 @@ class GaussianJobControl():
       out_object.write('#PBS -l nodes=1:ppn='+g09_parameters[2]+'\n')
       out_object.write('#PBS -l walltime=100000:00:00\n')
       out_object.write('cd $PBS_O_WORKDIR\n')
-      out_object.write('echo "gaussian" >>/home/qhuang/HzwDb/jobnumber/job.log\n')
+      out_object.write('echo gaussian >>/home/qhuang/HzwDb/jobnumber/job.log\n')
       out_object.write('g09 < '+g09_parameters[7]+'>'+g09_parameters[8]+'\n')
       out_object.write("sed -i '$d' /home/qhuang/HzwDb/jobnumber/job.log\n")
     os.system('qsub '+g09_parameters[10])
@@ -140,7 +140,7 @@ class GaussianJobControl():
         os.chdir(self.root_dir)
         os.mkdir(molecular_dir)
         shutil.move(files,molecular_dir)
-        self.generate_files(molecular_dir)
+        self.__generate_folders(molecular_dir)
         numofjob = sum(1 for line in open('/home/qhuang/HzwDb/jobnumber/job.log'))
       
         while 1:
@@ -150,11 +150,11 @@ class GaussianJobControl():
             if b<self.cpu_cores:
               if os.path.exists(molecular_dir):
                 os.chdir(molecular_dir)
-                self.generate_input(files,molecular_dir,'s0',self.cores)
+                self.__generate_input(files,molecular_dir,'s0',self.cores)
               break
-          sleep(90)
+          sleep(30)
           numofjob = sum(1 for line in open('/home/qhuang/HzwDb/jobnumber/job.log'))
-        sleep(5)
+        sleep(2)
         numofjob = sum(1 for line in open('/home/qhuang/HzwDb/jobnumber/job.log'))
         while 1:
           if numofjob<self.cpu_cores:
@@ -163,11 +163,11 @@ class GaussianJobControl():
             if b<self.cpu_cores:
               if os.path.exists(molecular_dir):
                 os.chdir(molecular_dir)
-                self.generate_input(files,molecular_dir,'s1',self.cores)
+                self.__generate_input(files,molecular_dir,'s1',self.cores)
               break
-          sleep(90)
+          sleep(30)
           numofjob = sum(1 for line in open('/home/qhuang/HzwDb/jobnumber/job.log'))
-        sleep(5)
+        sleep(2)
         numofjob = sum(1 for line in open('/home/qhuang/HzwDb/jobnumber/job.log'))
         while 1:
           if numofjob<self.cpu_cores:
@@ -176,18 +176,18 @@ class GaussianJobControl():
             if b<self.cpu_cores:
               if os.path.exists(molecular_dir):
                 os.chdir(molecular_dir)
-                self.generate_input(files,molecular_dir,'t1',self.cores)
+                self.__generate_input(files,molecular_dir,'t1',self.cores)
               break
-          sleep(90)
+          sleep(30)
           numofjob = sum(1 for line in open('/home/qhuang/HzwDb/jobnumber/job.log'))
-        sleep(5)
+        sleep(2)
 
-  def str_to_13(self,via):
+  def __str_to_13(self,via):
     num = 13 - len(vib)
     temp = ' '*num
     return temp+vib
 
-  def parse_log_s0(self,fname):
+  def __parse_log_s0(self,fname):
     #begin to parse *.com file to obtain atom symbol, atom number and charge of molecular
     atom_syb = []
     temp = fname.split('.')
@@ -211,9 +211,6 @@ class GaussianJobControl():
     charge = atom_syb[0]
     atom_num = len(atom_syb)-1
     #end to parse *.com file
-    #
-  
-    #
     base_name = os.path.basename(fname)
     temp = base_name.split('_')
     molecular = temp[1] #molecular symbol
@@ -244,8 +241,6 @@ class GaussianJobControl():
     res_list14 = []
     i = 0
     #begin to parse *.log file 
-    #
-    #
     with open(fname,'r') as in_object:
       while 1:
         line = in_object.readline()
@@ -374,7 +369,7 @@ class GaussianJobControl():
       for i in range(atom_num):
         atom_pos.append(res_list12[-1-i])
     else:
-      print molecular_dir
+      print(molecular_dir)
     str1 = re.compile(r'-*\d+\.\d+')
     if res_list1:
       temp = str1.findall(res_list1[-1])
@@ -497,7 +492,7 @@ class GaussianJobControl():
           temp = i.split(' ')
           for j in temp:
             t1 = '%.6f' % float(j)
-            t1=self.str_to_13(t1)
+            t1=self.__str_to_13(t1)
             out_object.write(' ')
             out_object.write(t1)
             out_object.write('  ')
@@ -518,7 +513,7 @@ class GaussianJobControl():
             out_object.write('\n')   
     #end write properties to *.mols file
   
-  def parse_log_s1t1(self,fname,states):
+  def __parse_log_s1t1(self,fname,states):
     #begin to parse *.com file to obtain atom symbol, atom number and charge of molecular
     atom_syb = []
     temp = fname.split('.')
@@ -612,7 +607,7 @@ class GaussianJobControl():
           out_object.write('\n')
 
   #parse *.xyz file to obtain SMILES
-  def parse_xyz(self,fname):
+  def __parse_xyz(self,fname):
     with open(fname,'r') as in_object:
       lines = in_object.readlines()
       temp = lines[-2]
@@ -626,7 +621,7 @@ class GaussianJobControl():
       molsfile = self.root_dir+dirs+'/'+dirs+'.mols'
       if not os.path.isfile(molsfile):
         fname = molecular_dir+dirs+'.xyz'
-        smiles = self.parse_xyz(fname)
+        smiles = self.__parse_xyz(fname)
       
       
         work_dir = molecular_dir+'s0/'
@@ -639,9 +634,9 @@ class GaussianJobControl():
           temp = fname.split('_')
           out_file = molecular_dir+temp[0]+'_'+temp[1]+'.mols'
           fname = work_dir + fname
-          self.parse_log_s0(fname)
+          self.__parse_log_s0(fname)
         else:
-          print molecular_dir
+          print(molecular_dir)
         
         tokens = '------------------------------Excited State S1: energy(Ha),lifetime(au),structure(Angstrom)-----------------------------\n'
         note1 = '  #S1'
@@ -654,7 +649,7 @@ class GaussianJobControl():
             break
         if re.match(r'.*\.log',fname):
           fname = work_dir + fname
-          self.parse_log_s1t1(fname,'s1')
+          self.__parse_log_s1t1(fname,'s1')
         
         tokens = '------------------------------Excited State T1: energy(Ha),lifetime(au),structure(Angstrom)-----------------------------\n'
         note1 = '  #T1'
@@ -667,7 +662,7 @@ class GaussianJobControl():
             break
         if re.match(r'.*\.log',fname):
           fname = work_dir + fname
-          self.parse_log_s1t1(fname,'t1')
+          self.__parse_log_s1t1(fname,'t1')
 
   def error_handle(self):
     desti_dir = '/home/qhuang/HzwDb/gdb_error/'
@@ -693,7 +688,6 @@ class GaussianJobControl():
                   #file.write(errorinfo)
                   #file.write('\n')
     print(n)
-
 
 
 

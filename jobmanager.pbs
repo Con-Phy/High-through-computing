@@ -1,8 +1,9 @@
 #PBS -S /bin/bash
 #PBS -N  jobmanager
+#PBS -o jobmanager_o
+#PBS -e jobmanager_e
 #PBS -l nodes=1:ppn=1
 #PBS -l walltime=100000:00:00
 cd $PBS_O_WORKDIR
-echo "gaussian" >> /home/qhuang/HzwDb/jobnumber/job.log
 python main.py
-sed -i '$d' /home/qhuang/HzwDb/jobnumber/job.log
+

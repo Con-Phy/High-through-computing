@@ -5,16 +5,30 @@ from time import sleep
 class GaussianJobControl():
 
   def __init__(self,cores,cpu_cores,user,root_dir,gdb,gdb_done,gdb_error,molsfile_dir):
-    self.cores = cores  # the number of cpu that every job use
-    self.cpu_cores = cpu_cores  # the total number of cpu that machine have or user define
-    self.root_dir = root_dir    # the dir that contains the gdb dir, gdb_done dir and gdb_error dir
+    '''
+    the initialise function  
+    self.cores:  the number of cpu that every job use
+    self.cpu_cores:  the max number of cpu that machine have or jobs that user define
+    self.root_dir:  the dir that contains the gdb dir, gdb_done dir, gdb_error dir and molsfile_dir
+    self.gdb:  jobs in calculating are included in variable gdb
+    self.gdb_done:  jobs done are included in variable gdb_done
+    self.gdb_error:  jobs with error are included in variable gdb_error 
+    self.molsfile_dir:  all mols files are included in variable molsfile_dir
+    self.user:  user name who submit the calculation jobs
+    '''
+    self.cores = cores 
+    self.cpu_cores = cpu_cores  
+    self.root_dir = root_dir    
     self.gdb = gdb
-    self.gdb_error = gdb_error
     self.gdb_done = gdb_done
-    self.molsfile_dir = molsfile_dir  # the dir that contains all the mos file
-    self.user = user                  # user name on computation node 
+    self.gdb_error = gdb_error
+    self.molsfile_dir = molsfile_dir  
+    self.user = user                   
 
   def __generate_folders(self,molecular_dir):
+    '''
+    generate all the foders needed in the calculation process
+    '''
     dirs = molecular_dir+'/s0'
     os.chdir(molecular_dir)
     if not os.path.exists(dirs):
@@ -45,6 +59,16 @@ class GaussianJobControl():
       os.mkdir(self.gdb_error)
   
   def __generate_input(self,files,dirs,states):
+    '''
+    the fuction do the follow three steps for a molecular :
+    1. generate input file needed by gaussian software
+    2. generate pbs file to submit the calulation job
+    3. submit the job
+    parameters :
+    files represent .xyz file name of a molecular
+    dirs represent dir different calulation job resided 
+    states represent different calculation job
+    '''
     out_dir = os.path.join(dirs,states)
     g09_parameters = []
     memories = '4'
@@ -129,7 +153,7 @@ class GaussianJobControl():
             out_object.write('%.10f' % float(temp[3]))
           out_object.write('\n')
         else:
-          print(line)
+          #print(line)
           os.system('mv '+dirs +' '+self.gdb_error)
           return
       out_object.write('\n')
@@ -143,6 +167,10 @@ class GaussianJobControl():
     os.system('qsub '+g09_parameters[10])
 
   def submission_control(self):
+    '''
+    the fuction controls the submission process
+    to ensure that only cpu_cores jobs are submitted
+    '''
     joblog = self.root_dir + '/' + 'jobnumber' + '/' + 'job.log'
     for files in os.listdir(self.gdb):
       if os.path.isfile(os.path.join(self.gdb,files)):
@@ -194,11 +222,18 @@ class GaussianJobControl():
     return temp+vib
 
   def __parse_log_s0(self,fname,outfile,smiles):
+    '''
+    the function do the follow 2 steps : 
+    1. parse the *_s0.log file to obtain different physical and chemical info
+    2. write the info to the *.mols file
+    '''
+
     #begin to parse *.com file to obtain atom symbol, atom number and charge of molecular
+    
     atom_syb = []
     temp = fname.split('.')
     fname1 = temp[0]+'.com'
-    #print fname1
+
     with open(fname1,'r') as in_object:
       while 1:
         line = in_object.readline()
@@ -217,6 +252,7 @@ class GaussianJobControl():
     charge = atom_syb[0]
     atom_num = len(atom_syb)-1
     #end to parse *.com file
+    
     base_name = os.path.basename(fname)
     temp = base_name.split('_')
     molecular = temp[1] #molecular symbol
@@ -246,7 +282,9 @@ class GaussianJobControl():
     res_list13 = []
     res_list14 = []
     i = 0
+
     #begin to parse *.log file 
+
     with open(fname,'r') as in_object:
       while 1:
         line = in_object.readline()
@@ -368,14 +406,14 @@ class GaussianJobControl():
             res_list14.append(line)
             j+=1
     #end parse *.log file
-    #
+
+
     #begin to obtain ground state data from raw data 
-    #print res_list12 
+
     if res_list12:          
       for i in range(atom_num):
         atom_pos.append(res_list12[-1-i])
-    else:
-      print(molecular_dir)
+
     str1 = re.compile(r'-*\d+\.\d+')
     if res_list1:
       temp = str1.findall(res_list1[-1])
@@ -428,9 +466,10 @@ class GaussianJobControl():
         temp = i.split(' ')
         atom_mass.append(temp[-1])
     #end obtain ground state data from raw data
-    #
+
+
     #begin to write properties to *.mols file
-    # 
+
     with open(outfile,'w') as out_object:
       out_object.write('------------------------------Chemical Formula and Charge---------------------------------------------------------------\n')
       out_object.write(' ')
@@ -517,10 +556,18 @@ class GaussianJobControl():
                 out_object.write('%.6f' % float(k))
                 out_object.write('  ')
             out_object.write('\n')   
+
     #end write properties to *.mols file
   
   def __parse_log_s1t1(self,fname,states,outfile,tokens,note1,note2):
+    '''
+    the function do the follow 2 steps : 
+    1. parse the *_s1.log or *_t1.log file to obtain different physical and chemical info
+    2. write the info to the *.mols file
+    '''
+
     #begin to parse *.com file to obtain atom symbol, atom number and charge of molecular
+
     atom_syb = []
     temp = fname.split('.')
     fname1 = temp[0]+'.com'
@@ -541,9 +588,9 @@ class GaussianJobControl():
           atom_syb.append(temp[0])
     charge = atom_syb[0]
     atom_num = len(atom_syb)-1
+
     #end to parse *.com file
-    #
-    #energy_s1  = []
+
     atom_pos  = []
     res_list1 = []
     res_list2 = []
@@ -612,8 +659,11 @@ class GaussianJobControl():
             out_object.write('  ')
           out_object.write('\n')
 
-  #parse *.xyz file to obtain SMILES
   def __parse_xyz(self,fname):
+    '''
+    parse *.xyz file to obtain SMILES
+    '''
+
     with open(fname,'r') as in_object:
       lines = in_object.readlines()
       temp = lines[-2]
@@ -621,12 +671,21 @@ class GaussianJobControl():
       return temp[0]
 
   def all_mol_dir(self):
+    '''
+    the function returns the file info including molecular folders and files
+    in the gdb folder
+    '''
     return os.listdir(self.gdb)
 
-  #parse gaussian output files
   def parse_logfile(self,mol_dir):
-    #for dirs in os.listdir(self.gdb):
-    if os.path.isdir(mol_dir):
+    '''
+    the function will parse all the *.log file
+    after calculation is done
+    and write all the information to the *.mols file
+    '''
+
+    temp = self.gdb + '/' + mol_dir
+    if os.path.isdir(temp):
       molecular_dir = self.gdb +'/' + mol_dir + '/'
       molsfile = self.gdb +'/'+mol_dir+'/'+mol_dir+'.mols'
       if not os.path.isfile(molsfile):
@@ -644,8 +703,6 @@ class GaussianJobControl():
           out_file = molecular_dir+temp[0]+'_'+temp[1]+'.mols'
           fname = work_dir + fname
           self.__parse_log_s0(fname,out_file,smiles)
-        else:
-          print(molecular_dir)
         
         tokens = '------------------------------Excited State S1: energy(Ha),lifetime(au),structure(Angstrom)-----------------------------\n'
         note1 = '  #S1'
@@ -672,16 +729,24 @@ class GaussianJobControl():
         if re.match(r'.*\.log',fname):
           fname = work_dir + fname
           self.__parse_log_s1t1(fname,'t1',out_file,tokens,note1,note2)
-        os.system('cp ' + molsfile +' '+self.molsfile_dir)
+        shutil.copy(molsfile,self.molsfile_dir)
       else:
         mosfile_in_dir = self.molsfile_dir+'/'+mol_dir+'.mols'
         if not os.path.isfile(mosfile_in_dir):
-          os.system('cp ' + molsfile +' '+self.molsfile_dir)
+          shutil.copy(molsfile,self.molsfile_dir)
 
   def error_handle(self,mol_dir):
-    #n=0
-    #for dirs in os.listdir(self.gdb):
-    if os.path.isdir(mol_dir):
+    '''
+    the function handles the error calculations
+    if the calculation of a molecular is termination by any error
+    the function is called to handle it and return true.
+    otherwise just return false.
+    Notice: the error handle process just moves the error calculation folder 
+    to the gdb_error folder
+    '''
+
+    temp = self.gdb + '/' + mol_dir
+    if os.path.isdir(temp):
       molsfile = self.gdb+'/'+mol_dir+'/'+mol_dir+'.mols'
       s0logfile = self.gdb+'/'+mol_dir+'/'+'s0'+'/'+mol_dir+'_s0.log'
       s1logfile = self.gdb+'/'+mol_dir+'/'+'s1'+'/'+mol_dir+'_s1.log'
@@ -707,22 +772,33 @@ class GaussianJobControl():
         if s0errorinfo or s1errorinfo or t1errorinfo:
           #n = n+1
           if os.path.exists(mol_dir):
-            os.system('mv '+mol_dir +' '+self.gdb_error)
+            shutil.move(mol_dir,self.gdb_error)
+            return True
         elif not s0errorinfo and not s1errorinfo and not t1errorinfo:
           if not os.path.isfile(s0logfile) or not os.path.isfile(s1logfile) or not os.path.isfile(t1logfile):
-            #n = n+1
-            os.system('mv '+mol_dir +' '+self.gdb_error)
-          #elif os.path.exists(dirs):
-            #os.system('mv '+dirs +' '+self.gdb_done)
-      #print(n)
+            shutil.move(mol_dir,self.gdb_error)
+            return True
+    return False
 
   def job_is_done(self):
+    '''
+    the function checks if all the calculations are done
+    done: return true
+    otherwise return false
+    '''
     a = os.popen('qstat | grep '+self.user+' | wc -l')
     jobnumber = int(a.read())
     if jobnumber==1:
-      return True
+      if not all_mol_dir():
+        return True
 
   def calculation_is_checked(self,mol_dir):
+    '''
+    the function checks if the calculation of a molecular is done
+    if the job is done, return true
+    otherwise return false
+    '''
+
     s0logfile = self.gdb+'/'+mol_dir+'/'+'s0'+'/'+mol_dir+'_s0.log'
     s1logfile = self.gdb+'/'+mol_dir+'/'+'s1'+'/'+mol_dir+'_s1.log'
     t1logfile = self.gdb+'/'+mol_dir+'/'+'t1'+'/'+mol_dir+'_t1.log'
@@ -744,11 +820,20 @@ class GaussianJobControl():
       process.close()
     if s0info and s1info and t1info:
       return True
+    return False
 
   def mv2gdb_done(self,mol_dir):
-    os.system('mv ' + self.gdb + '/' + mol_dir + ' '+self.gdb_done)
+    '''
+    the function move the molecular dir to the gdb_done dir
+    '''
+    molecular_dir = self.gdb + '/' + mol_dir
+    shutil.move(molecular_dir,self.gdb_done)
 
   def my_sleep(self):
+    '''
+    the process would sleep 300s
+    once the function is called
+    '''
     sleep(300)
 
 

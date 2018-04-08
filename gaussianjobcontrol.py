@@ -66,7 +66,7 @@ class GaussianJobControl():
     3. submit the job
     parameters :
     files represent .xyz file name of a molecular
-    dirs represent dir different calulation job resided 
+    dirs represent dir in which different calulation job resided 
     states represent different calculation job
     '''
     out_dir = os.path.join(dirs,states)
@@ -153,8 +153,7 @@ class GaussianJobControl():
             out_object.write('%.10f' % float(temp[3]))
           out_object.write('\n')
         else:
-          #print(line)
-          os.system('mv '+dirs +' '+self.gdb_error)
+          shutil.move(dirs,self.gdb_error)
           return
       out_object.write('\n')
     with open(g09_parameters[10],'w') as out_object:
